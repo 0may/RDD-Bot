@@ -1,0 +1,12 @@
+uint32 channel
+uint32 move_forward
+uint32 move_backward
+uint32 strafe_left 
+uint32 strafe_right
+uint32 rotate_left
+uint32 rotate_right
+uint32 speaker_up
+uint32 speaker_down
+uint32 move_speed
+uint32 rotate_speed
+uint32 speaker_speed

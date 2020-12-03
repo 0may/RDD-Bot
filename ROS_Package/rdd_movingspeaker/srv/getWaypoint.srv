@@ -1,0 +1,9 @@
+int64 waypointnumber
+---
+int64 n
+int64 t
+int64 B
+int64 x
+int64 y
+int64 alpha
+int64 beta

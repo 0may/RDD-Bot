@@ -1,0 +1,10 @@
+<launch>
+	<include file="$(find rdd_movingspeaker)/launch/configparameters.launch" />
+	<node pkg="rdd_movingspeaker" type="jsonreceiver.py" name="jsonreceiver" />
+	<!-- <node pkg="rdd_movingspeaker" type="jsonreceiverWP.py" name="jsonreceiverWP" /> -->
+	<node pkg="rdd_movingspeaker" type="manualcontroller.py" name="manualcontroller" output="screen" />
+	<node pkg="rdd_movingspeaker" type="midiconverter.py" name="midiconverter" output="screen" />
+	<!-- <node pkg="rdd_movingspeaker" type="wpcontroller.py" name="wpcontroller" /> -->
+	<!-- <node pkg="rdd_movingspeaker" type="positionsender.py" name="positionsender" /> -->
+	<!-- <node pkg="rdd_movingspeaker" type="mapsender.py" name="mapsender" /> -->
+</launch>
