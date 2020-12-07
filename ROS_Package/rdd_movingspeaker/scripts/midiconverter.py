@@ -2,6 +2,7 @@
 import rospy
 import pygame.midi
 from rdd_movingspeaker.msg import manualcontrol
+#MIDIPORT = USB Port number of the MIDI device
 MIDIPORT=rospy.get_param("midiport")
 
 def talker(input_device):
@@ -18,13 +19,14 @@ def talker(input_device):
                     pubmanual.publish(midiMSG)      #MIDI command for manual control
                 elif (midiMSG.mode is 6):
                     pubwaypoint.publish(midiMSG)    #MIDI command for WP control
-                #if (midiMSG.pitch == 2):             #muss noch geklaert werden
+                #if (midiMSG.pitch == 2):           #uncomment with the correct value for pitch to allow resend map + uncomment pubmaprefresh (line 11)
                 #    pubmaprefresh.publish("")
                 print(midiobject)
                       
 def translator(midiobject):
     """Translates the MIDI message into a readable object"""
     try:
+        #for futher information refer to readme
         midiMSG = manualcontrol()
         midituple = (midiobject[0][0][0], midiobject[0][0][1], midiobject[0][0][2], midiobject[0][0][3], midiobject[0][1])
         midiMSG.mode = (midituple[0] & 0b01110000) >> 4
