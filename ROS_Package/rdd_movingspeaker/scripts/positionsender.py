@@ -2,8 +2,9 @@
 
 import rospy
 import socket
-
+#UDP_IP = IP of the Host of the GUI
 UDP_IP=rospy.get_param("ipmaster")
+#UDP_PORT = Port of the Host of the GUI for the reception of the coordinates of the robot
 UDP_PORT=rospy.get_param("coordport")
 
 def callback(data, sock):
