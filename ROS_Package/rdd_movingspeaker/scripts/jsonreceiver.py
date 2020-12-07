@@ -4,8 +4,13 @@ import json
 import socket
 from rdd_movingspeaker.msg import midiconfig 
 import time
+
+#Variables of configparameters.launch
+#JSONPATH = Path where MIDI Config File is located
 JSONPATH=rospy.get_param("midiconfigpath")
+#IP = IP of Robot
 IP=rospy.get_param("Robo_IP")
+#PORT = Port of Portlistener where JSON Midiconfig file is expected
 PORT=rospy.get_param("json_midiconfig_PORT")
 
 def talker():
@@ -27,6 +32,7 @@ def talker():
         if not online:
             rospy.spin()
         sc, address = sock.accept()
+        #receive and write every 1024 bits to the file defined under JSONPATH until buffer is empty
         with open(JSONPATH, 'w') as f:
             l = sc.recv(1024)
             while(l):
