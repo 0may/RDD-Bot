@@ -3,9 +3,14 @@ import rospy
 import json
 import socket
 from rdd_movingspeaker.srv import getWaypoint,getWaypointResponse
+
+#jsonWP is used to store JSON file (Waypoint) information as an object
 jsonWP=dict()
+#JSONPATH = Path of the JSON file (Waypoint)
 JSONPATH=rospy.get_param("waypointpath")
+#IP = IP of the robot 
 IP=rospy.get_param("Robo_IP")
+#PORT = Port of Robot where JSON file (Waypoint) is expected 
 PORT=rospy.get_param("json_WP_PORT")
 
 def getWaypointServer():
@@ -25,6 +30,7 @@ def getWaypointServer():
         if not online:
             rospy.spin()
         sc, address = sock.accept()
+        #receive and write every 1024 bits to the file defined under JSONPATH until buffer is empty
         with open(JSONPATH, 'w') as f:
             l = sc.recv(1024)
             while(l):
@@ -55,6 +61,7 @@ def getWaypointhandle(req):
     wp = getWaypointResponse()
     try:
         for elem in jsonWP.get('waypoints'):
+            #compare received waypoint index with indexes from the JSON waypoint file
             if elem.get('n') != req.waypointnumber:
                 continue
             wp.n = elem.get('n')
