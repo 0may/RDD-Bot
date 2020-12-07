@@ -3,8 +3,11 @@
 import rospy
 import socket
 
+#TCP_IP = IP of Host of the GUI
 TCP_IP=rospy.get_param("ipmaster")
+#TCP_PORT = Port of Host over which the map is sent
 TCP_PORT=rospy.get_param("mapport")
+#MAP_PATH = Path where map is stored on the robot
 MAP_PATH=rospy.get_param("mappath")
 
 
@@ -25,6 +28,7 @@ def callback(data):
     try:
         if sock:
             mapfile = open(MAP_PATH, 'rb')
+            #sends every 1024 bits until map buffer is empty
             while(mapfile):
                 sock.send(mapfile)
                 mapfile = f.read(1024)
