@@ -17,6 +17,7 @@ def talker():
     """Publishes the configuration for manual control"""
     pubinstructions = rospy.Publisher('manualinstructions', midiconfig, queue_size=10)
     rospy.init_node('jsonreceiver', anonymous=True)
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind((IP, PORT))
@@ -25,10 +26,12 @@ def talker():
     except Exception as e:
         print("Invalid IP and Port. Please change the parameters in the configparameters.launch file. Using local Config File from Path.")
         online = False
+
     while not rospy.is_shutdown():
         time.sleep(3)
         midiConfig = jsonread()
         pubinstructions.publish(midiConfig)
+
         if not online:
             rospy.spin()
         sc, address = sock.accept()
@@ -38,7 +41,8 @@ def talker():
             while(l):
                 f.write(l)
                 l = sc.recv(1024)
-                            
+
+
 def jsonread():
     """Reads in json file from provided path"""
     try: 
@@ -55,6 +59,7 @@ def jsonread():
         print(e)
         exit()
     return translator(data)
+
 
 def translator(configdict):
     """Translates json formatted info into the message object"""
@@ -76,11 +81,13 @@ def translator(configdict):
         configMSG.speaker_position_q2 = configdict.get('controlchange').get('speaker_position_q2')
         configMSG.speaker_position_q3 = configdict.get('controlchange').get('speaker_position_q3')
         configMSG.speaker_position_q4 = configdict.get('controlchange').get('speaker_position_q4')
+        configMSG.speaker_position_q4 = configdict.get('controlchange').get('speaker_position_reset')
     except Exception as e:
         print(e)
         exit()
     return configMSG
         
+
 if __name__ == '__main__':
     try:
         talker()

@@ -5,26 +5,31 @@ from rdd_movingspeaker.msg import manualcontrol
 #MIDIPORT = USB Port number of the MIDI device
 MIDIPORT=rospy.get_param("midiport")
 
+
 def talker(input_device):
     """Publishes the MIDI command from the MIDI device"""
     rospy.init_node('midiconverter', anonymous=True)
     #pubmaprefresh = rospy.Publisher('maprefresh', int, queue_size=10)
     pubmanual = rospy.Publisher('midimanual', manualcontrol, queue_size=10)
     pubwaypoint = rospy.Publisher('midiwaypoint', manualcontrol, queue_size=10)
+
     while not rospy.is_shutdown():
+
         if input_device.poll():
                 midiobject = input_device.read(1)
                 midiMSG = translator(midiobject) 
-                if (midiMSG.mode in (0, 1, 3, 7)):  # 0 is noteOff, 1 is noteOn, 2 is controlChange, 7 is systemCommon (clock), 6 is pitchBend
+                if (midiMSG.mode in (0, 1, 3, 7)):  # 0 is noteOff, 1 is noteOn, 3 is controlChange, 7 is systemCommon (clock), 6 is pitchBend
                     pubmanual.publish(midiMSG)      #MIDI command for manual control
                 elif (midiMSG.mode is 6):
                     pubwaypoint.publish(midiMSG)    #MIDI command for WP control
                 #if (midiMSG.pitch == 2):           #uncomment with the correct value for pitch to allow resend map + uncomment pubmaprefresh (line 11)
                 #    pubmaprefresh.publish("")
                 print(midiobject)
-                      
+
+
 def translator(midiobject):
     """Translates the MIDI message into a readable object"""
+    
     try:
         #for futher information refer to readme
         midiMSG = manualcontrol()
@@ -40,10 +45,12 @@ def translator(midiobject):
         print(e)
     return midiMSG 
 
+
 def list_midi_devices():
     """Prints all available MIDI USB-Devices"""
     for n in range(pygame.midi.get_count()):
         print (n,pygame.midi.get_device_info(n))
+
 
 def get_midi_device():
     """Returns the MIDI input device object"""
@@ -57,6 +64,7 @@ def get_midi_device():
             midiport = raw_input("Invalid PORT. Please insert a new PORT-number: ")
     return(my_input)
         
+
 if __name__ == '__main__':
     try:
         pygame.midi.init()

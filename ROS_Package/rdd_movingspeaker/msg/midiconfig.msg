@@ -10,3 +10,8 @@ uint32 speaker_down
 uint32 move_speed
 uint32 rotate_speed
 uint32 speaker_speed
+uint32 speaker_position_q1
+uint32 speaker_position_q2
+uint32 speaker_position_q3
+uint32 speaker_position_q4
+uint32 speaker_position_reset
