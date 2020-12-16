@@ -5,6 +5,7 @@ import socket
 from rdd_movingspeaker.msg import midiconfig 
 import time
 
+
 #Variables of configparameters.launch
 #JSONPATH = Path where MIDI Config File is located
 JSONPATH=rospy.get_param("midiconfigpath")

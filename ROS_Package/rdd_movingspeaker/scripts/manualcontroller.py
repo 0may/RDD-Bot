@@ -37,6 +37,7 @@ moveDefaultVelocity = 127
 isSpeakerResetting = False
 
 
+
 def callback_midimanual(data):
     """Calls function for moving the robot"""
     global alive

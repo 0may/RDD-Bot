@@ -28,6 +28,7 @@ def talker(input_device):
                     print(midiobject)
 
 
+
 def translator(midiobject):
     """Translates the MIDI message into a readable object"""
     
