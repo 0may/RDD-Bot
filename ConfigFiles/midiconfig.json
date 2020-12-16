@@ -19,5 +19,6 @@
         "speaker_position_q3": 25,
         "speaker_position_q4": 26,
         "speaker_position_reset": 27
-    }
+    },
+    "resend": 4
 }

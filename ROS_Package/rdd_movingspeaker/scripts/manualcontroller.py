@@ -4,6 +4,7 @@ import rospy
 from geometry_msgs.msg import Twist
 from rdd_movingspeaker.msg import manualcontrol, midiconfig
 import os
+import subprocess
 
 #midiConfig = is set to true if MIDI-Config is available and in right format
 midiConfig=False
@@ -12,7 +13,7 @@ midiConfig=False
 manualcontrol_publisher=0
 
 #control = dict that describes the current cmd_vel of the robot
-# [[x,y,z][α,β,γ]]
+# [[x,y,z][alpha,beta,gamma]]
 control=[[0,0,0],[0,0,0]]
 
 #CHANNEL_ROBOT = MIDI-CHANNEL over which robot is communicating to the GUI
@@ -33,12 +34,14 @@ speakerDefaultVelocity = 127
 rotateDefaultVelocity = 127
 moveDefaultVelocity = 127
 
+isSpeakerResetting = False
+
 
 def callback_midimanual(data):
     """Calls function for moving the robot"""
     global alive
-    print(data.mode)
-    print(data.channel, "channel")
+    #print(data.mode)
+    #print(data.channel, "channel")
     try:
         if midiConfig:
             alive=1
@@ -49,8 +52,9 @@ def callback_midimanual(data):
                 return
             #calls movement function that corresponds to the given pitch of the current data
             options[(data.pitch)](data)
-            write_pub_vel_msg(control)
-            print("got befehl")
+            print("MidiMsg received: mode={}  pitch={}  velo={}".format(data.mode, data.pitch, data.velocity))
+            #write_pub_vel_msg(control)
+            #print("got befehl")
         if not midiConfig:
             print("no midiconfig!!")
             return
@@ -64,6 +68,8 @@ def callback_instructions(data):
     global options
     #setting variable midiConfig to true --> commands can now be sent
     midiConfig=True
+
+    print(data)
     #load functions in dict options with the corresponding keys
     options={data.move_forward: move_forward,
              data.move_backward: move_backward,
@@ -138,7 +144,8 @@ def write_pub_vel_msg(control):
     vel_msg.angular.x = control[1][0]
     vel_msg.angular.y = control[1][1]
     vel_msg.angular.z = control[1][2]
-    print(vel_msg)
+    if vel_msg.linear.x != 0 or vel_msg.linear.y != 0 or vel_msg.linear.z != 0 or vel_msg.angular.x != 0 or vel_msg.angular.y != 0 or vel_msg.angular.z != 0:
+        print(vel_msg)
     manualcontrol_publisher.publish(vel_msg)
 
 
@@ -146,14 +153,14 @@ def calculate_speed(data, i1, i2, direction):
     """Calculates the speed and direction"""
     #i1 = 0 for linear speed
     #i1 = 1 for angular speed
-    #i2 = 0,1,2 for x,y,z (linear) or α,β,γ (angular)
+    #i2 = 0,1,2 for x,y,z (linear) or alpha,beta,gamma (angular)
     #direction = +1 if moving forward
     #direction = -1 if moving backward
     global control
     #mode = 1 equals to note on msg (MIDI) --> speed is calculated from velocity (MIDI)
     #max speed is 1.0
     if (data.mode == 1):
-        speed = (direction/127.0)*data.velocity
+        speed = direction*data.velocity/127.0
     #mode = 0 equals to note off msg (MIDI) --> speed is set to zero
     if (data.mode == 0):
         speed = 0
@@ -162,8 +169,16 @@ def calculate_speed(data, i1, i2, direction):
 
 
 def rotate_speaker_up(velocity):
+    global isSpeakerResetting
+
     # normalize velocity
     nvelo = velocity/127.0
+
+    if isSpeakerResetting:
+        cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings.txt"
+        print(cmd)
+        os.system(cmd) 
+        isSpeakerResetting = False
 
     # send command
     cmd = "ticcmd --velocity " + str(int(nvelo*speakerMaxSpeed + 0.5))
@@ -172,8 +187,16 @@ def rotate_speaker_up(velocity):
 
 
 def rotate_speaker_down(velocity):
+    global isSpeakerResetting
+
     # normalize velocity
     nvelo = velocity/127.0
+
+    if isSpeakerResetting:
+        cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings.txt"
+        print(cmd)
+        os.system(cmd) 
+        isSpeakerResetting = False
 
     # send command
     cmd = "ticcmd --velocity -" + str(int(nvelo*speakerMaxSpeed + 0.5))
@@ -182,17 +205,25 @@ def rotate_speaker_down(velocity):
 
 
 def position_speaker(quadrant, qposition):
+    global isSpeakerResetting
+
     pos = 0 # target position
     nqpos = qposition / 127.0 # normalized quadrant position
 
-    # quadrant = 0: angle = [0°, 90°]
-    # quadrant = 1: angle = [90°, 180°]
-    # quadrant = 2: angle = [-90°, 0°]
-    # quadrant = 3: angle = [-180°, -90°]
+    # quadrant = 0: angle = [0 , 90]
+    # quadrant = 1: angle = [90, 180]
+    # quadrant = 2: angle = [-90, 0]
+    # quadrant = 3: angle = [-180, -90]
     if quadrant == 0 or quadrant == 1:
         pos = int((nqpos + quadrant) * speakerMaxPosition * 0.5 + 0.5)
     elif quadrant == 2 or quadrant == 3:
         pos = int((nqpos + (quadrant - 2)) * speakerMaxPosition * 0.5 + 0.5) * -1
+
+    if isSpeakerResetting:
+        cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings.txt"
+        print(cmd)
+        os.system(cmd) 
+        isSpeakerResetting = False
 
     cmd = "ticcmd --position " + str(pos)
     print(cmd)
@@ -200,10 +231,19 @@ def position_speaker(quadrant, qposition):
 
 
 def reset_speaker_position():
-    # TODO this is only for development without a 0-position switch
-    cmd = "ticcmd --halt-and-set-position 0"
-    print(cmd)
-    os.system(cmd)  
+    global isSpeakerResetting
+
+    if not isSpeakerResetting:
+
+        isSpeakerResetting = True
+
+        cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings_homing.txt"
+        print(cmd)
+        os.system(cmd)  
+
+        cmd = "ticcmd --home rev"
+        print(cmd)
+        os.system(cmd)
 
 
 def move_forward(data):

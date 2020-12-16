@@ -81,7 +81,7 @@ def translator(configdict):
         configMSG.speaker_position_q2 = configdict.get('controlchange').get('speaker_position_q2')
         configMSG.speaker_position_q3 = configdict.get('controlchange').get('speaker_position_q3')
         configMSG.speaker_position_q4 = configdict.get('controlchange').get('speaker_position_q4')
-        configMSG.speaker_position_q4 = configdict.get('controlchange').get('speaker_position_reset')
+        configMSG.speaker_position_reset = configdict.get('controlchange').get('speaker_position_reset')
     except Exception as e:
         print(e)
         exit()

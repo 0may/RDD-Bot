@@ -24,7 +24,8 @@ def talker(input_device):
                     pubwaypoint.publish(midiMSG)    #MIDI command for WP control
                 #if (midiMSG.pitch == 2):           #uncomment with the correct value for pitch to allow resend map + uncomment pubmaprefresh (line 11)
                 #    pubmaprefresh.publish("")
-                print(midiobject)
+                if midiMSG.mode in(0, 1, 3):
+                    print(midiobject)
 
 
 def translator(midiobject):
@@ -57,7 +58,7 @@ def get_midi_device():
     midiport=MIDIPORT
     while True:
         try:
-            my_input = pygame.midi.Input(int(midiport))
+            my_input = pygame.midi.Input(int(midiport), 4096)
             break
         except:
             list_midi_devices()
