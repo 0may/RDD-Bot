@@ -29,12 +29,13 @@ speakerMaxSpeed = 400000000
 # maximum speaker position. also determines minimum speaker position as -speakerMaxPosition
 speakerMaxPosition = 32000
 
-# default velocities
-speakerDefaultVelocity = 127
-rotateDefaultVelocity = 127
-moveDefaultVelocity = 127
+# velocity scalings -> they map the incoming velocities to a range of smaller velocities, i.e. [0 to maximum_velocity*scaling]
+speakerVelocityScaling = 1.0
+rotateVelocityScaling = 1.0
+moveVelocityScaling = 1.0
 
 isSpeakerResetting = False
+isSpeakerPositioning = False
 
 
 
@@ -165,11 +166,19 @@ def calculate_speed(data, i1, i2, direction):
     #mode = 0 equals to note off msg (MIDI) --> speed is set to zero
     if (data.mode == 0):
         speed = 0
-    control[i1][i2] = speed
+    
+    if (i1 == 0):
+        control[i1][i2] = speed*moveVelocityScaling
+    elif (i1 == 1):
+        control[i1][i2] = speed*rotateVelocityScaling
+    else:
+        control[i1][i2] = speed
+
     write_pub_vel_msg(control)
 
 
 def rotate_speaker_up(velocity):
+    global isSpeakerPositioning
     global isSpeakerResetting
 
     # normalize velocity
@@ -181,13 +190,20 @@ def rotate_speaker_up(velocity):
         os.system(cmd) 
         isSpeakerResetting = False
 
+    if isSpeakerPositioning:
+        cmd = "ticcmd --max-speed " + str(speakerMaxSpeed)
+        print(cmd)
+        os.system(cmd)  
+        isSpeakerPositioning = False       
+
     # send command
-    cmd = "ticcmd --velocity " + str(int(nvelo*speakerMaxSpeed + 0.5))
+    cmd = "ticcmd --velocity " + str(int(nvelo*speakerMaxSpeed*speakerVelocityScaling + 0.5))
     print(cmd)
     os.system(cmd)
 
 
 def rotate_speaker_down(velocity):
+    global isSpeakerPositioning
     global isSpeakerResetting
 
     # normalize velocity
@@ -196,16 +212,24 @@ def rotate_speaker_down(velocity):
     if isSpeakerResetting:
         cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings.txt"
         print(cmd)
-        os.system(cmd) 
+        os.system(cmd)
         isSpeakerResetting = False
 
+    if isSpeakerPositioning:
+        cmd = "ticcmd --max-speed " + str(speakerMaxSpeed)
+        print(cmd)
+        os.system(cmd)
+        isSpeakerPositioning = False
+
+
     # send command
-    cmd = "ticcmd --velocity -" + str(int(nvelo*speakerMaxSpeed + 0.5))
+    cmd = "ticcmd --velocity -" + str(int(nvelo*speakerMaxSpeed*speakerVelocityScaling + 0.5))
     print(cmd)
     os.system(cmd)
 
 
 def position_speaker(quadrant, qposition):
+    global isSpeakerPositioning
     global isSpeakerResetting
 
     pos = 0 # target position
@@ -226,6 +250,13 @@ def position_speaker(quadrant, qposition):
         os.system(cmd) 
         isSpeakerResetting = False
 
+
+    isSpeakerPositioning = True
+
+    cmd = "ticcmd --max-speed " + str(int(speakerMaxSpeed*speakerVelocityScaling + 0.5))
+    print(cmd)
+    os.system(cmd)  
+
     cmd = "ticcmd --position " + str(pos)
     print(cmd)
     os.system(cmd)  
@@ -233,9 +264,10 @@ def position_speaker(quadrant, qposition):
 
 def reset_speaker_position():
     global isSpeakerResetting
+    global isSpeakerPositioning
 
     if not isSpeakerResetting:
-
+        isSpeakerPositioning = False
         isSpeakerResetting = True
 
         cmd = "ticcmd --settings /home/nvidia/CONFIGFILES/tic_settings_homing.txt"
@@ -321,23 +353,23 @@ def speaker_position_reset(data):
 
 
 def move_speed(data):
-    global moveDefaultVelocity
+    global moveVelocityScaling
     print("move_speed")
-    moveDefaultVelocity = data.velocity
+    moveVelocityScaling = data.velocity/127.0
     print(data)
 
 
 def rotate_speed(data):
-    global rotateDefaultVelocity
+    global rotateVelocityScaling
     print("rotate_speed")
-    rotateDefaultVelocity = data.velocity
+    rotateVelocityScaling = data.velocity/127.0
     print(data)
 
 
 def speaker_speed(data):
-    global speakerDefaultVelocity
+    global speakerVelocityScaling
     print("speaker_speed")
-    speakerDefaultVelocity = data.velocity
+    speakerVelocityScaling = data.velocity/127.0
     print(data)
 
 
