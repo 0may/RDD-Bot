@@ -1,0 +1,64 @@
+DWAPlannerROS:
+
+# Robot Configuration Parameters - YouBot
+
+  acc_lim_x: 0.75 # default 2.5
+  acc_lim_y: 0.75  # default 2.5, diff drive robot
+  acc_lim_th: 1.0 # default 3.2
+  #acc_lim_trans: 0.1 #dan: added because visible in dyn reconfigure
+
+  # Warning!
+  #   do not set min_trans_vel to 0.0 otherwise dwa will always think translational velocities
+  #   are non-negligible and small in place rotational velocities will be created.
+
+  max_vel_trans: 0.9 # default 0.55, choose slightly less than the base  s capability
+  min_vel_trans: 0.05  # this is the min trans velocity when there is negligible rotational velocity
+  #trans_stopped_vel: 0.1 # turtlebot default
+
+  max_vel_x: 0.8 # default 0.55
+  min_vel_x: -0.8 # default 0.0
+
+  max_vel_y: 0.7  # default 0.1, diff drive robot
+  min_vel_y: -0.7  # default -0.1, diff drive robot
+
+  max_vel_theta: 2.0  # default: 1.0, choose slightly less than the base s capability
+  min_vel_theta: 0.05  # default: 0.4, this is the min angular velocity when there is negligible translational velocity
+
+  #theta_stopped_vel: 0.4
+
+# Goal Tolerance Parameters
+  yaw_goal_tolerance: 0.1  # default 0.05
+  xy_goal_tolerance: 0.2  # default 0.1, 0.08 ok
+  # latch_xy_goal_tolerance: false, param removed?
+
+# Forward Simulation Parameters
+  sim_time: 1.7       # default 1.7
+  sim_granularity: 0.025 # default 0.025
+  vx_samples: 3       # default 3
+  vy_samples: 10       # default 10 diff drive robot, there is only one sample
+  vtheta_samples: 20  # default 20, renamed?
+  vth_samples: 20  # default 20
+
+# Trajectory Scoring Parameters
+  path_distance_bias: 32.0      # default 32.0   - weighting for how much it should stick to the global path plan
+  goal_distance_bias: 24.0      # default 24.0   - weighting for how much it should attempt to reach its goal
+  occdist_scale: 0.01            # default 0.01   - weighting for how much the controller should avoid obstacles
+  forward_point_distance: 0.163 # default 0.325  - how far along to place an additional scoring point, scale with map resolution
+  stop_time_buffer: 0.2         # default 0.2    - amount of time a robot must stop in before colliding for a valid traj.
+  scaling_speed: 0.25           # default 0.25   - absolute velocity at which to start scaling the robot s footprint
+  max_scaling_factor: 0.2       # default 0.2    - how much to scale the robot s footprint when at speed.
+
+# Oscillation Prevention Parameters
+  oscillation_reset_dist: 0.05  # default 0.05   - how far to travel before resetting oscillation flags
+  #oscillation_reset_angle: 0.2  # default 0.2, new param?
+
+# Global Plan Parameters
+  prune_plan: false # default true, whether or not to eat up the plan
+
+# Debugging
+  publish_traj_pc : true # default false (topic trajectory_cloud)
+  publish_cost_grid_pc: true # default false
+  global_frame_id: map # default odom (set in topic trajectory_cloud, published if param publish_traj_pc is true)
+
+# Differential-drive robot configuration - necessary?
+#  holonomic_robot: false #  parameter removed?

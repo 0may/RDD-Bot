@@ -1,0 +1,22 @@
+<?xml version='1.0'?>
+
+<launch>
+
+  <!-- joy node -->
+  <node respawn="false" pkg="joy" type="joy_node" name="joy_node" >
+    <param name="dev" type="string" value="/dev/input/js0" />
+    <param name="deadzone" value="0.05" />
+    <param name="autorepeat_rate" value="10" />
+    <remap from="joy" to="joy_ps4_wired" />
+  </node>
+
+  <node respawn="false" pkg="evo_robot_sim" type="control_ps.py" name="control_ps_node" output="screen">
+    <remap from="joy_topic" to="joy_ps4_wired" />
+    <remap from="cmd_vel" to="cmd_vel/joy"/>
+  </node>
+
+  <node respawn="false" pkg="evo_robot_sim" type="lift_ps4.py" name="lift_ps_node" >
+    <remap from="joy_topic" to="joy_ps4_wired" />
+  </node>
+
+</launch>

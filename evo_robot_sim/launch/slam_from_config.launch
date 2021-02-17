@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<!-- Launches the evo TSD SLAM with setings from an external YAML file -->
+<launch>
+    <!-- External parameters -->
+    <arg name="config" default="$(find evo_robot_sim)/config/slam_default.yaml"/>
+
+    <!-- SLAM node -->
+    <node name="slam_node" pkg="evo_tsd_slam" type="slam_node" output="screen">
+        <rosparam command="load" file="$(arg config)" />
+    </node>
+
+    <!-- TODO: automatic argument evaluation with xacro -->
+    <!-- This STP has an equivalent of the same name in the localization launch file. -->
+    <!-- If you modify this STP, check that one as well. -->
+    <arg name="l2b_x" value="-0.30" />
+    <arg name="l2b_z" value="-0.10" />
+    <node pkg="tf" type="static_transform_publisher" name="stp_laser_1_link" args="$(arg l2b_x) 0 $(arg l2b_z) 0 0 0 1 laser_1_link base_footprint_slam 2"/>
+    
+    <!-- This STP replaces an STP of the same name, but with differents TFs -->
+    <!-- in the localization launch file. -->    
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_root_link" args="0 0 0 0 0 0 1 base_footprint_slam root_link 2"/>
+
+</launch>

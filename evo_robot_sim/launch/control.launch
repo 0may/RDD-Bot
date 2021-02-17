@@ -1,0 +1,20 @@
+<?xml version='1.0'?>
+
+<launch>
+<!--
+  <node respawn="false" pkg="evo_robot_sim" type="control.py" name="control_node" >
+  </node>
+-->
+  <node respawn="false" pkg="evo_robot_sim" type="sim_base_controller_node" name="control_node" output="screen" >
+    <param name="wheel_radius_in_m"  		               value="0.05"      />
+    <param name="wheel_distance_front_back_in_m"       value="0.80"     />
+    <param name="wheel_distance_left_right_in_m"       value="0.50"     />
+        <!-- <remap from="cmd_vel" to="cmd_vel/twist"/> -->
+
+
+  </node>
+
+  <node respawn="false" pkg="evo_robot_sim" type="lift.py" name="lift_node" >
+  </node>
+
+</launch>

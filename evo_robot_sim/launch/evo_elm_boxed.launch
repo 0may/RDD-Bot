@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+
+<!-- author: Helmut Engelhardt -->
+<!-- brief:  This is the default launch file -->
+<!-- date:   2020-02-11 -->
+<launch>
+  <!-- helper variables-->
+  <arg name="PI"   value="3.14159265"    />
+  <arg name="PI05" value="1.57079632679" />
+
+  <arg name="cam_height" default="0.1"   />
+  <arg name="cam_yaw" default="$(arg PI05)" />
+  <arg name="cam_x" default="0" />
+  <arg name="cam_y" default="0" />
+
+  <arg name="base_footprint_frame" default="base_footprint_elm"/>
+  <arg name="camera_floor_frame" default="cam_floor"/>
+  <arg name="camera_floor_topic" default="evo_robot/cam_floor"/>
+
+  <arg name="vodom_frame_id_parent" default="odom_visual"/>
+  <arg name="vodom_publish_tf" default="true"/>
+  <arg name="vodom_publish_debug_tf" default="false"/>
+  
+  <arg name="map_directory" default="$(find evo_robot_sim)/config/"/>
+  <arg name="frame_map" default="map"/>
+
+  
+  <!-- TF Tree ELM
+       TODO: x, y, and yaw -->
+  <node pkg="tf" name="stf_$(arg base_footprint_frame)__$(arg camera_floor_frame)" type="static_transform_publisher" args="0 0 $(arg cam_height) $(arg PI05) $(arg PI) 0 $(arg base_footprint_frame) $(arg camera_floor_frame) 500" />  
+
+  <node pkg="evo_elm_localization" type="evo_elm_localization_node" name="evo_elm_localization_node" output="screen" >
+    <param name="frame_map"                type="string" value="$(arg frame_map)" />
+    <param name="frame_camera"             type="string" value="$(arg camera_floor_frame)" />
+    <param name="frame_base_footprint"     type="string" value="$(arg base_footprint_frame)" />
+
+    <!--visual odometry params -->
+    <param name="vodom_is_enabled"         type="bool"   value="true" />
+
+    <param name="vodom_publish_tf"         type="bool"   value="$(arg vodom_publish_tf)" />
+    <param name="vodom_frame_id_parent"    type="string" value="$(arg vodom_frame_id_parent)" />
+
+    <param name="vodom_publish_debug_tf"   type="bool"   value="$(arg vodom_publish_debug_tf)" />
+    <param name="vodom_debug_tf_frame_id_parent" value="$(arg frame_map)"/>
+    <param name="vodom_debug_tf_frame_id_child" value="$(arg base_footprint_frame)_map"/>
+
+    <!--map params -->
+    <param name="map_directory"            type="string" value="$(arg map_directory)" />
+
+    <!--localizer params -->
+    <param name="localizer_frame_diff"     type="string" value="$(arg vodom_frame_id_parent)" />
+    <param name="localization_node_show_detected_features" value="true" />
+
+    <remap from="/camera/image_rect"  to="/$(arg camera_floor_topic)/image_raw"/>
+    <remap from="/camera_info" to="/$(arg camera_floor_topic)/camera_info"/>
+  </node>
+
+</launch>

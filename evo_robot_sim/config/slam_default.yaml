@@ -1,0 +1,67 @@
+# Default configuration file for evo TSD SLAM
+
+## ROS topics
+map_topic    : "map"
+pose_topic   : "pose"
+laser_topic  : "evo_robot/laser_1/scan"
+get_map_topic: "map"
+
+
+## Map
+# General
+map_size  : 11
+cellsize  : 0.03 # in m
+
+# TSD
+max_weight       : 10.
+truncation_radius: 3   # as a whole factor of the cell size
+
+# Offset in m
+x_offset: 0.
+y_offset: 0.
+
+# Object inflation
+object_inflation_factor: 0  # 0: No object inflation
+
+# Update interval for the occupancy grid in sec
+occ_grid_time_interval: 2.
+
+
+## Ray casting ranges in m
+min_range             : 0.3
+max_range             : 30.
+low_reflectivity_range: 2.
+
+
+## Registration
+# Mode (0: ICP only, 1: Experimental, 2: TSD PDF)
+registration_mode: 2
+
+# Additional parameters for pre-matchers
+trials        : 30
+sizeControlSet: 360
+epsThresh     : 0.15
+zrand         : 0.05
+ransac_phi_max: 45.
+
+
+## ICP
+icp_iterations: 30
+
+# Maximum and minimum distance for matching points in m
+dist_filter_max: 0.4
+dist_filter_min: 0.2
+
+# Maximum translation in m and rotation between two scans
+reg_trs_max:     1.
+reg_sin_rot_max: 0.5
+
+
+## Transforms tf
+# Frame ids
+tf_map_frame   : "map"
+tf_sensor_frame: "laser_1_link"
+tf_target_frame: ""
+
+# Transformation lookup timeout in sec
+tf_timeout: 0.2 

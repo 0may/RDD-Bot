@@ -1,0 +1,151 @@
+<?xml version='1.0'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="drive" params="parent pose_ident xyz rpy mirror">  <!-- ?? front_pndlm_link fl-->
+
+  <joint name="${parent}_2_${pose_ident}_lift_link" type="revolute">
+    <parent link="${parent}"/>
+    <child link="${pose_ident}_lift_link"/>
+    <origin xyz = "${xyz}" rpy = "${rpy}"/>
+    <dynamics damping="0.001" friction="0"/>
+    <limit effort="1000" velocity="10.0" lower="-${lift_phi_up}" upper="${lift_phi_down}" />
+    <!-- <safety_controller k_velocity="100" k_position="100" soft_lower_limit="-0.3" soft_upper_limit="0.05" /> -->
+    <axis xyz = "0 ${mirror} 0"/>
+  </joint>
+
+  <link name="${pose_ident}_lift_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+    <!-- todo params -->
+  <joint name="${pose_ident}_lift_link_2_${pose_ident}_rim_link" type="continuous">
+    <parent link="${pose_ident}_lift_link"/>
+    <child link="${pose_ident}_rim_link"/>
+    <dynamics damping="0.1" friction="${wheel_friction}"/>
+    <limit effort="30.0" velocity="100" />
+    <axis xyz = "0 1 0"/>
+    <origin xyz = "0 0 ${-lift_height}" rpy = "0 0 0"/>
+  </joint>
+
+  <link name="${pose_ident}_rim_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <!-- <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/> -->
+        <mesh filename="file://$(find evo_robot_sim)/meshes/MW_C_95mm_000_002_Assembly_Right.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+     <!-- todo params -->
+  <joint name="${pose_ident}_rim_link_2_${pose_ident}_roller_link" type="continuous">
+    <parent link="${pose_ident}_rim_link"/>
+    <child link="${pose_ident}_roller_link"/>
+    <dynamics damping="0.001" friction="0"/>
+    <!-- <limit effort="3000000" velocity="10" /> -->
+    <axis xyz = "1 1 0"/>
+    <origin xyz = "0 0 0" rpy = "0 0 0"/>
+  </joint>
+
+  <link name="${pose_ident}_roller_link">
+    <inertial>
+      <mass value="${wheel_mass}"/>
+      <xacro:inertia_sphere radius="${wheel_diameter / 2.0}" mass="${wheel_mass}"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="${wheel_diameter / 2.0}"/>
+      </geometry>
+    </collision>
+  </link>
+
+     <!-- todo params -->
+  <gazebo reference="${pose_ident}_roller_link">
+   <turnGravityOff>false</turnGravityOff>
+    <mu1>0.5</mu1>
+    <mu2>0.5</mu2>
+
+    <!-- <maxVel>0.1</maxVel>
+    <minDepth>0.1</minDepth> -->
+
+    <!-- <collision name="${pose_ident}_roller_link_collision">
+      <surface>
+        <friction>
+          <torsional>
+            <coefficient>1000.0</coefficient>
+            <use_patch_radius>true</use_patch_radius>
+            <patch_radius>0.04</patch_radius>
+          </torsional>
+        </friction>
+      </surface>
+    </collision>   -->
+  </gazebo>
+
+  <transmission name="${pose_ident}_lift_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${parent}_2_${pose_ident}_lift_link">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${pose_ident}_lift_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${pose_ident}_wheel_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${pose_ident}_lift_link_2_${pose_ident}_rim_link">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${pose_ident}_wheel_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="${pose_ident}_roller_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="${pose_ident}_rim_link_2_${pose_ident}_roller_link">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="${pose_ident}_roller_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+</xacro:macro>
+
+</robot>

@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<launch>
+
+    <include file="$(find evo_tsd_slam)/launch/slam.launch" >
+        <arg name="map_topic" value="map" />    <!-- topic of occupancy grid -->
+        <arg name="pose_topic" value="pose" />    <!-- topic for robot's pose -->
+        <arg name="laser_topic" value="/evo_robot/laser_1/scan" />    <!-- topic to receive laser scan -->
+
+        <arg name="x_offset" value="0.0" />
+        <arg name="y_offset" value="0.0" />
+
+        <arg name="map_size" value="11" />
+        <arg name="cellsize" value="0.03" />
+        <arg name="truncation_radius" value="3" />
+
+        <arg name="min_range" value="0.3" />
+        <arg name="max_range" value="30.0" />
+
+        <arg name="tf_base_frame" value="map" />
+        <arg name="tf_child_frame" value="laser_1_link" />
+        <arg name="tf_footprint_frame" value="base_footprint_slam" />
+    </include>
+
+    <!-- TODO: automatic argument evaluation with xacro -->
+    <!-- This STP has an equivalent of the same name in the localization launch file. -->
+    <!-- If you modify this STP, check that one as well. -->
+    <arg name="l2b_x" value="-0.30" />
+    <arg name="l2b_z" value="-0.10" />
+    <node pkg="tf" type="static_transform_publisher" name="stp_laser_1_link" args="$(arg l2b_x) 0 $(arg l2b_z) 0 0 0 1 laser_1_link base_footprint_slam 2"/>
+    
+    <!-- This STP replaces an STP of the same name, but with differents TFs -->
+    <!-- in the localization launch file. -->
+    <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_root_link" args="0 0 0 0 0 0 1 base_footprint_slam root_link 2"/>
+
+</launch>

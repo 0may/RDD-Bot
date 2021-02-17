@@ -1,0 +1,16 @@
+lift_phi_up: 0.1 #positive!
+lift_phi_down: 0.75 #positive!
+lift_height: 0.10
+
+wheelbase_fb: 0.8
+wheelbase_lr: 0.5
+wheel_diameter: 0.1
+wheel_mass: 0.15
+wheel_friction: 0.20
+
+cassis_mass: 15.0
+cassis_length: 0.6
+cassis_width: 0.4
+cassis_height: 0.1
+
+

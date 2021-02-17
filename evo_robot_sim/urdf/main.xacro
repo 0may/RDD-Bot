@@ -1,0 +1,184 @@
+<?xml version='1.0'?>
+
+<robot name="evo_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find evo_robot_sim)/urdf/plugins.xacro"/>
+  <xacro:include filename="$(find evo_robot_sim)/urdf/inertias.xacro"/>
+  <xacro:include filename="$(find evo_robot_sim)/urdf/drive.xacro"/>
+
+  <xacro:property name="axis_caster_mass" value="0.01"/>
+  <xacro:property name="axis_caster_size" value="0.01"/>
+
+  <xacro:property name="lift_phi_down" value="${g['lift_phi_down']}"/>
+  <xacro:property name="lift_phi_up" value="${g['lift_phi_up']}"/>
+  <xacro:property name="lift_height" value="${g['lift_height']}"/>
+  <xacro:property name="wheelbase_fb"  value="${g['wheelbase_fb']}"/>
+  <xacro:property name="wheelbase_lr"  value="${g['wheelbase_lr']}"/>
+  <xacro:property name="wheel_diameter"  value="${g['wheel_diameter']}"/>
+  <xacro:property name="wheel_mass"  value="${g['wheel_mass']}"/>
+  <xacro:property name="wheel_friction" value="${g['wheel_friction']}"/>
+  <xacro:property name="cassis_mass" value="${g['cassis_mass']}"/>
+  <xacro:property name="cassis_length" value="${g['cassis_length']}"/>
+  <xacro:property name="cassis_width"  value="${g['cassis_width']}"/>
+  <xacro:property name="cassis_height" value="${g['cassis_height']}"/>
+
+  <xacro:property name="M_PI" value="3.141592653589793"/>
+
+  <xacro:property name="yaml_file" value="$(find evo_robot_sim)/config/urdf_global_properties.yaml" />
+  <xacro:property name="g" value="${load_yaml(yaml_file)}"/>
+
+  <link name="root_link"/>
+
+  <joint name="root_link_2_base_link" type="fixed">
+    <parent link="root_link"/>
+    <child link="base_link"/>
+    <origin xyz = "0 0 ${lift_height + wheel_diameter / 2.0}" rpy = "0 0 0"/>
+  </joint>
+
+  <joint name="base_link_2_front_pndlm_link" type="revolute">
+    <parent link="base_link"/>
+    <child link="front_pndlm_link"/>
+    <origin xyz = "${+wheelbase_fb / 2.0} 0 0" rpy = "0 0 0"/>
+    <dynamics damping="0.001" friction="0"/>
+    <limit effort="1000" velocity="100.0" lower="-0.5" upper="0.5" />
+    <axis xyz = "1 0 0"/>
+  </joint>
+
+  <transmission name="front_pndlm_tran">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="base_link_2_front_pndlm_link">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="front_pndlm_motor">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <joint name="base_link_2_back_pndlm_link" type="fixed">
+    <parent link="base_link"/>
+    <child link="back_pndlm_link"/>
+    <origin xyz = "${-wheelbase_fb / 2.0} 0 0" rpy = "0 0 0"/>
+  </joint>
+
+  <joint name="base_link_2_laser_1_link" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_1_link"/>
+    <origin xyz = "${cassis_length / 2.0} 0 ${-cassis_height/2.0}" rpy = "0 0 0"/>
+  </joint>
+
+  <joint name="base_link_2_cam_floor_link" type="fixed">
+    <parent link="base_link"/>
+    <child link="cam_floor_link"/>
+    <origin xyz = "0 0 ${-cassis_height/2.0}" rpy = "0 ${M_PI / 2.0} 0"/>
+  </joint>
+
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${cassis_mass}"/>
+      <xacro:inertia_box size_x="${cassis_length}" size_y="${cassis_width}" size_z="${cassis_height}" mass="${cassis_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="file://$(find evo_robot_sim)/meshes/EvoRobot-01e-Teile-reduziert-Rahmen.stl" scale="0.001 0.001 0.001"/>
+        <!-- <box size="${cassis_length} ${cassis_width} ${cassis_height}"/> -->
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${cassis_length} ${cassis_width} ${cassis_height}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="front_pndlm_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="back_pndlm_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <link name="cam_floor_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!--TODO: create xacro macro for all casters - DAM-->
+  <link name="laser_1_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="${axis_caster_mass}"/>
+      <xacro:inertia_box size_x="${axis_caster_size}" size_y="${axis_caster_size}" size_z="${axis_caster_size}" mass="${axis_caster_mass}"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="${axis_caster_size} ${axis_caster_size} ${axis_caster_size}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <xacro:drive parent="front_pndlm_link"  pose_ident="fl" xyz="0 ${+wheelbase_lr / 2.0} 0" rpy="0 0 0"          mirror="-1"/>
+  <xacro:drive parent="front_pndlm_link"  pose_ident="fr" xyz="0 ${-wheelbase_lr / 2.0} 0" rpy="0 0 ${M_PI}"    mirror="+1"/>
+  <xacro:drive parent="back_pndlm_link"   pose_ident="bl" xyz="0 ${+wheelbase_lr / 2.0} 0" rpy="0 0 0"          mirror="+1"/>
+  <xacro:drive parent="back_pndlm_link"   pose_ident="br" xyz="0 ${-wheelbase_lr / 2.0} 0" rpy="0 0 ${M_PI}"    mirror="-1"/>
+
+
+</robot>
