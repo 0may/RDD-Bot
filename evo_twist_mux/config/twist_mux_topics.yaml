@@ -7,10 +7,15 @@
 
 topics:
 -
+  name    : reverse
+  topic   : cmd_vel/rev
+  timeout : 1.0
+  priority: 100
+-
   name    : joystick
   topic   : cmd_vel/joy
   timeout : 1.0
-  priority: 100
+  priority: 90
 -
   name    : ros_navigation
   topic   : cmd_vel/nav
